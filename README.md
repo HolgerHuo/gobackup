@@ -3,24 +3,14 @@
 
 <h1 align="center">GoBackup</h1>
 <p align="center">Simple tool for backup your databases, files to cloud storages.</p>
-<p align="center">
-   <a href="https://github.com/huacnlee/gobackup/actions?query=workflow%3AGo"><img src="https://github.com/huacnlee/gobackup/workflows/Go/badge.svg" alt="Build Status" /></a>
-</p>
 </p>
 
 GoBackup is a fullstack backup tool design for web servers similar with [backup/backup](https://github.com/backup/backup), work with Crontab to backup automatically.
 
 You can write a config file, run `gobackup perform` command by once to dump database as file, archive config files, and then package them into a single file.
 
-It’s allow you store the backup file to local, FTP, SCP, S3 or other cloud storages.
+It’s allow you store the backup file to local or S3.
 
-GoBackup 是一个类似 [backup/backup](https://github.com/backup/backup) 的一站式备份工具，为中小型服务器／个人服务器而设计，配合 Crontab 以实现定时备份的目的。
-
-使用 GoBackup 你可以通过一个简单的配置文件，一次（执行一个命令）将服务器上重要的（数据库、配置文件）东西导出、打包压缩，并备份到指定目的地（如：本地路径、FTP、云存储...）。
-
-详细中文介绍： https://ruby-china.org/topics/34094
-
-https://gobackup.github.io/
 
 ## Features
 
@@ -36,7 +26,6 @@ https://gobackup.github.io/
 - MySQL
 - PostgreSQL
 - Redis - `mode: sync/copy`
-- MongoDB
 
 ### Archive
 
@@ -54,38 +43,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 ### Storages
 
 - Local
-- FTP
-- SCP - Upload via SSH copy
 - [Amazon S3](https://aws.amazon.com/s3)
-- [Alibaba Cloud Object Storage Service (OSS)](https://www.alibabacloud.com/product/oss)
-
-## Install (macOS / Linux)
-
-```bash
-$ curl -sSL https://git.io/gobackup | bash
-```
-
-after that, you will get `/usr/local/bin/gobackup` command.
-
-```bash
-$ gobackup -h
-NAME:
-   gobackup - Easy full stack backup operations on UNIX-like systems
-
-USAGE:
-   gobackup [global options] command [command options] [arguments...]
-
-VERSION:
-   1.0.0
-
-COMMANDS:
-     perform
-     help, h  Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --help, -h     show help
-   --version, -v  print the version
-```
 
 ## Configuration
 
@@ -94,7 +52,7 @@ GoBackup will seek config files in:
 - ~/.gobackup/gobackup.yml
 - /etc/gobackup/gobackup.yml
 
-Example config: [gobackup_test.yml](https://github.com/huacnlee/gobackup/blob/master/gobackup_test.yml)
+Example config: [gobackup.yml.sample](https://github.com/holgerhuo/gobackup/blob/main/gobackup.yml.sample)
 
 ```yml
 models:
