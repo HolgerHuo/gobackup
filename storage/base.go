@@ -2,8 +2,8 @@ package storage
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/holgerhuo/gobackup/config"
+	"github.com/holgerhuo/gobackup/logger"
 	"github.com/spf13/viper"
 	"path/filepath"
 )
@@ -47,14 +47,8 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	switch model.StoreWith.Type {
 	case "local":
 		ctx = &Local{Base: base}
-	case "ftp":
-		ctx = &FTP{Base: base}
-	case "scp":
-		ctx = &SCP{Base: base}
 	case "s3":
 		ctx = &S3{Base: base}
-	case "oss":
-		ctx = &OSS{Base: base}
 	default:
 		return fmt.Errorf("[%s] storage type has not implement", model.StoreWith.Type)
 	}

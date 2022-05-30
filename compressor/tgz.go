@@ -1,7 +1,7 @@
 package compressor
 
 import (
-	"github.com/huacnlee/gobackup/helper"
+	"github.com/holgerhuo/gobackup/helper"
 )
 
 // Tgz .tar.gz compressor

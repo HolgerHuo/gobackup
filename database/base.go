@@ -2,9 +2,9 @@ package database
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/holgerhuo/gobackup/config"
+	"github.com/holgerhuo/gobackup/helper"
+	"github.com/holgerhuo/gobackup/logger"
 	"github.com/spf13/viper"
 	"path"
 )
@@ -46,8 +46,6 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 		ctx = &Redis{Base: base}
 	case "postgresql":
 		ctx = &PostgreSQL{Base: base}
-	case "mongodb":
-		ctx = &MongoDB{Base: base}
 	default:
 		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
 		return

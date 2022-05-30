@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/model"
+	"github.com/holgerhuo/gobackup/config"
+	"github.com/holgerhuo/gobackup/model"
 	"github.com/urfave/cli"
 )
 

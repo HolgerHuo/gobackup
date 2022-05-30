@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/holgerhuo/gobackup/helper"
+	"github.com/holgerhuo/gobackup/logger"
 	"path"
 )
 

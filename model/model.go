@@ -3,13 +3,13 @@ package model
 import (
 	"os"
 
-	"github.com/huacnlee/gobackup/archive"
-	"github.com/huacnlee/gobackup/compressor"
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/database"
-	"github.com/huacnlee/gobackup/encryptor"
-	"github.com/huacnlee/gobackup/logger"
-	"github.com/huacnlee/gobackup/storage"
+	"github.com/holgerhuo/gobackup/archive"
+	"github.com/holgerhuo/gobackup/compressor"
+	"github.com/holgerhuo/gobackup/config"
+	"github.com/holgerhuo/gobackup/database"
+	"github.com/holgerhuo/gobackup/encryptor"
+	"github.com/holgerhuo/gobackup/logger"
+	"github.com/holgerhuo/gobackup/storage"
 )
 
 // Model class
