@@ -31,6 +31,7 @@ type S3 struct {
 
 func (ctx *S3) open() (err error) {
 	ctx.viper.SetDefault("region", "us-east-1")
+	ctx.viper.SetDefault("force_path_style", false)
 	cfg := aws.NewConfig()
 	endpoint := ctx.viper.GetString("endpoint")
 	if len(endpoint) > 0 {
@@ -46,6 +47,7 @@ func (ctx *S3) open() (err error) {
 
 	ctx.bucket = ctx.viper.GetString("bucket")
 	ctx.path = ctx.viper.GetString("path")
+	cfg.S3ForcePathStyle = aws.Bool(ctx.viper.GetBool("force_path_style"))
 
 	sess := session.Must(session.NewSession(cfg))
 	ctx.client = s3manager.NewUploader(sess)
