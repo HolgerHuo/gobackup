@@ -62,13 +62,15 @@ func (ctx *PostgreSQL) prepare() (err error) {
 		dumpArgs = append(dumpArgs, "--username="+ctx.username)
 	}
 
+	dumpArgs = append(dumpArgs, "-Fc --compress=0")
+
 	ctx.dumpCommand = "pg_dump " + strings.Join(dumpArgs, " ") + " " + ctx.database
 
 	return nil
 }
 
 func (ctx *PostgreSQL) dump() error {
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
+	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".dump")
 	logger.Info("-> Dumping PostgreSQL...")
 	if len(ctx.password) > 0 {
 		os.Setenv("PGPASSWORD", ctx.password)

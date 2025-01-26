@@ -45,8 +45,10 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		ctx = &Tgz{Base: base}
 	case "tar":
 		ctx = &Tar{Base: base}
+	case "zstd":
+		ctx = &Zstd{Base: base}
 	default:
-		ctx = &Tar{}
+		ctx = &Zstd{Base: base}
 	}
 
 	logger.Info("------------ Compressor -------------")

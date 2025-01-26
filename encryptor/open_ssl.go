@@ -23,7 +23,7 @@ func (ctx *OpenSSL) perform() (encryptPath string, err error) {
 	sslViper := ctx.viper
 	sslViper.SetDefault("salt", true)
 	sslViper.SetDefault("base64", false)
-    sslViper.SetDefault("iter", 10000)
+    sslViper.SetDefault("iter", 100000)
 	sslViper.SetDefault("pbkdf2", true)
 
 	ctx.salt = sslViper.GetBool("salt")
