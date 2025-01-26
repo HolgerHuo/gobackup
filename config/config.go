@@ -53,17 +53,15 @@ func Init(configFile string) {
 	} else {
 		viper.SetConfigName("gobackup")
 
-		// ./gobackup.yml
-		viper.AddConfigPath(".")
 		// ~/.gobackup/gobackup.yml
-		viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
+		viper.AddConfigPath("$HOME/.gobackup")
 		// /etc/gobackup/gobackup.yml
-		viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
+		viper.AddConfigPath("/etc/gobackup/")
 	}
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		logger.Error("Load gobackup config faild", err)
+		logger.Error("Load gobackup config failed", err)
 		return
 	}
 
