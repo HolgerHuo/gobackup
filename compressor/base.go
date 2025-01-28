@@ -43,8 +43,6 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	switch model.CompressWith.Type {
 	case "tgz":
 		ctx = &Tgz{Base: base}
-	case "tar":
-		ctx = &Tar{Base: base}
 	case "zstd":
 		ctx = &Zstd{Base: base}
 	default:

@@ -15,13 +15,13 @@ const (
 var (
 	modelName  = ""
 	configFile = ""
-	version    = "1.0.1"
+	version    = "1.1.0-fork"
 )
 
 func main() {
 	app := cli.NewApp()
 	app.Version = version
-	app.Name = "gobackup(fork by Holger)"
+	app.Name = "gobackup"
 	app.Usage = usage
 
 	app.Commands = []cli.Command{
