@@ -2,53 +2,154 @@ package logger
 
 import (
 	"fmt"
-	"github.com/fatih/color"
-	"log"
-	"os"
+	"log/slog"
 )
 
-var (
-	logFlag = log.Ldate | log.Ltime
-	myLog   = log.New(os.Stdout, "", logFlag)
-)
-
-func init() {
-	isTest := os.Getenv("GO_ENV") == "test"
-	if isTest {
-		os.MkdirAll("../log", 0777)
-		logfile, _ := os.OpenFile("../log/test.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		myLog = log.New(logfile, "", logFlag)
-	}
-}
-
-// Print log
+// Print log - for backward compatibility
 func Print(v ...interface{}) {
-	myLog.Print(v...)
+	if len(v) == 0 {
+		return
+	}
+	msg := fmt.Sprint(v...)
+	slog.Info(msg)
 }
 
-// Println log
+// Println log - for backward compatibility
 func Println(v ...interface{}) {
-	myLog.Println(v...)
+	if len(v) == 0 {
+		return
+	}
+	msg := fmt.Sprint(v...)
+	slog.Info(msg)
 }
 
 // Debug log
 func Debug(v ...interface{}) {
-	myLog.Println("[debug]", fmt.Sprint(v...))
+	if len(v) == 0 {
+		return
+	}
+	
+	// First argument is the message
+	msg := fmt.Sprint(v[0])
+	
+	// If there are additional arguments, treat them as key-value pairs
+	if len(v) > 1 {
+		// Convert remaining arguments to key-value pairs
+		args := convertArgsToKeyValues(v[1:])
+		slog.Debug(msg, args...)
+	} else {
+		slog.Debug(msg)
+	}
 }
 
 // Info log
 func Info(v ...interface{}) {
-	myLog.Println(v...)
+	if len(v) == 0 {
+		return
+	}
+	
+	// First argument is the message
+	msg := fmt.Sprint(v[0])
+	
+	// If there are additional arguments, treat them as key-value pairs
+	if len(v) > 1 {
+		// Convert remaining arguments to key-value pairs
+		args := convertArgsToKeyValues(v[1:])
+		slog.Info(msg, args...)
+	} else {
+		slog.Info(msg)
+	}
 }
 
 // Warn log
 func Warn(v ...interface{}) {
-	c := color.YellowString(fmt.Sprint(v...))
-	myLog.Println(c)
+	if len(v) == 0 {
+		return
+	}
+	
+	// First argument is the message
+	msg := fmt.Sprint(v[0])
+	
+	// If there are additional arguments, treat them as key-value pairs
+	if len(v) > 1 {
+		// Convert remaining arguments to key-value pairs
+		args := convertArgsToKeyValues(v[1:])
+		slog.Warn(msg, args...)
+	} else {
+		slog.Warn(msg)
+	}
 }
 
 // Error log
 func Error(v ...interface{}) {
-	c := color.RedString(fmt.Sprint(v...))
-	myLog.Println(c)
+	if len(v) == 0 {
+		return
+	}
+	
+	// First argument is the message
+	msg := fmt.Sprint(v[0])
+	
+	// If there are additional arguments, treat them as key-value pairs
+	if len(v) > 1 {
+		// Convert remaining arguments to key-value pairs
+		args := convertArgsToKeyValues(v[1:])
+		slog.Error(msg, args...)
+	} else {
+		slog.Error(msg)
+	}
+}
+
+// Enhanced API for structured logging
+
+// DebugKV logs at Debug level with explicit key-value pairs
+func DebugKV(msg string, keyValues ...interface{}) {
+	slog.Debug(msg, keyValues...)
+}
+
+// InfoKV logs at Info level with explicit key-value pairs
+func InfoKV(msg string, keyValues ...interface{}) {
+	slog.Info(msg, keyValues...)
+}
+
+// WarnKV logs at Warn level with explicit key-value pairs
+func WarnKV(msg string, keyValues ...interface{}) {
+	slog.Warn(msg, keyValues...)
+}
+
+// ErrorKV logs at Error level with explicit key-value pairs
+func ErrorKV(msg string, keyValues ...interface{}) {
+	slog.Error(msg, keyValues...)
+}
+
+// Helper functions
+
+// convertArgsToKeyValues converts a slice of interface{} to key-value pairs
+// This helps maintain backward compatibility while enabling structured logging
+func convertArgsToKeyValues(args []interface{}) []any {
+	// For a single argument, add it as "details"
+	if len(args) == 1 {
+		return []any{"details", args[0]}
+	}
+	
+	// For multiple arguments, try to pair them as key-value
+	result := make([]any, 0, len(args))
+	
+	// If we have an odd number of arguments, the last one will be added as "details"
+	for i := 0; i < len(args); i++ {
+		if i+1 < len(args) {
+			// Try to convert the key to string
+			if key, ok := args[i].(string); ok {
+				result = append(result, key, args[i+1])
+				i++ // Skip the next item as we've used it as a value
+			} else {
+				// If key is not a string, add as a numbered item
+				result = append(result, fmt.Sprintf("item_%d", i), args[i])
+			}
+		} else {
+			// Last item with no pair
+			result = append(result, fmt.Sprintf("item_%d", i), args[i])
+		}
+	}
+	
+	return result
 }
