@@ -2,7 +2,7 @@ package helper
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 )
 
 // IsExistsPath check path exist
@@ -31,5 +31,5 @@ func ExplandHome(filePath string) string {
 		return filePath
 	}
 
-	return path.Join(os.Getenv("HOME"), filePath[2:])
+	return filepath.Join(os.Getenv("HOME"), filePath[2:])
 }

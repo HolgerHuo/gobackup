@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/holgerhuo/gobackup/helper"
@@ -71,7 +71,7 @@ func (ctx *PostgreSQL) prepare() (err error) {
 }
 
 func (ctx *PostgreSQL) dump() error {
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".dump")
+	dumpFilePath := filepath.Join(ctx.dumpPath, ctx.database+".dump")
 	
 	slog.Info("Dumping PostgreSQL database", 
 		"component", "database",

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -63,7 +63,7 @@ func (ctx *S3) upload(fileKey string) (err error) {
 		return fmt.Errorf("failed to open file %q, %v", ctx.archivePath, err)
 	}
 
-	remotePath := path.Join(ctx.path, fileKey)
+	remotePath := filepath.Join(ctx.path, fileKey)
 
 	input := &s3manager.UploadInput{
 		Bucket: aws.String(ctx.bucket),

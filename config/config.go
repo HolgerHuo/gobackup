@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/viper"
@@ -84,8 +84,8 @@ func Init(configFile string) {
 
 func loadModel(key string) (model ModelConfig) {
 	model.Name = key
-	model.TempPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
-	model.DumpPath = path.Join(model.TempPath, key)
+	model.TempPath = filepath.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
+	model.DumpPath = filepath.Join(model.TempPath, key)
 	model.Viper = viper.Sub("models." + key)
 
 	model.CompressWith = SubConfig{

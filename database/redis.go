@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 	"log/slog"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -131,7 +131,7 @@ func (ctx *Redis) save() error {
 }
 
 func (ctx *Redis) sync() error {
-	dumpFilePath := path.Join(ctx.dumpPath, "dump.rdb")
+	dumpFilePath := filepath.Join(ctx.dumpPath, "dump.rdb")
 	slog.Info("Syncing Redis dump file", 
 		"component", "database",
 		"type", "redis",

@@ -3,7 +3,6 @@ package archive
 import (
 	"fmt"
 	"log/slog"
-	"path"
 	"path/filepath"
 
 	"github.com/holgerhuo/gobackup/config"
@@ -43,13 +42,13 @@ func Run(model config.ModelConfig) (err error) {
 	slog.Info("Archive creation completed", 
 		"component", "archive",
 		"model", model.Name,
-		"archivePath", path.Join(model.DumpPath, "archive.tar"))
+		"archivePath", filepath.Join(model.DumpPath, "archive.tar"))
 
 	return nil
 }
 
 func options(dumpPath string, excludes, includes []string) (opts []string) {
-	tarPath := path.Join(dumpPath, "archive.tar")
+	tarPath := filepath.Join(dumpPath, "archive.tar")
 	if helper.IsGnuTar {
 		opts = append(opts, "--ignore-failed-read")
 	}

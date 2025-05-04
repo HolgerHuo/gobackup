@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 	"log/slog"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/holgerhuo/gobackup/helper"
@@ -72,7 +72,7 @@ func (ctx *MySQL) dumpArgs() []string {
 	}
 
 	dumpArgs = append(dumpArgs, ctx.database)
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
+	dumpFilePath := filepath.Join(ctx.dumpPath, ctx.database+".sql")
 	dumpArgs = append(dumpArgs, "--result-file="+dumpFilePath)
 	return dumpArgs
 }
