@@ -3,6 +3,7 @@ package encryptor
 import (
 	"fmt"
 	"github.com/holgerhuo/gobackup/helper"
+	"time"
 )
 
 // OpenSSL encryptor for use openssl aes-256-cbc
@@ -39,13 +40,21 @@ func (ctx *OpenSSL) perform() (encryptPath string, err error) {
 
 	encryptPath = ctx.archivePath + ".enc"
 
-	opts := ctx.options()
+	// Create a unique environment variable name
+	envVarName := fmt.Sprintf("GOBACKUP_OPENSSL_PASSWORD_%d", time.Now().UnixNano())
+	
+	// Set up the environment variable with the password
+	envVar := fmt.Sprintf("%s=%s", envVarName, ctx.password)
+	
+	opts := ctx.options(envVarName)
 	opts = append(opts, "-in", ctx.archivePath, "-out", encryptPath)
-	_, err = helper.Exec("openssl", opts...)
+	
+	// Execute with the password in an environment variable
+	_, err = helper.ExecWithCustomEnv("openssl", []string{envVar}, opts...)
 	return
 }
 
-func (ctx *OpenSSL) options() (opts []string) {
+func (ctx *OpenSSL) options(envVarName string) (opts []string) {
 	opts = append(opts, "aes-256-cbc")
 	if ctx.base64 {
 		opts = append(opts, "-base64")
@@ -59,6 +68,7 @@ func (ctx *OpenSSL) options() (opts []string) {
 	if ctx.pbkdf2 {
 		opts = append(opts, "-pbkdf2")
 	}
-	opts = append(opts, `-k`, ctx.password)
+	// Use environment variable instead of -k option
+	opts = append(opts, "-pass", "env:"+envVarName)
 	return opts
 }
