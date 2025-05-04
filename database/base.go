@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
+	"log/slog"
+	"path"
+
 	"github.com/holgerhuo/gobackup/config"
 	"github.com/holgerhuo/gobackup/helper"
-	"github.com/holgerhuo/gobackup/logger"
 	"github.com/spf13/viper"
-	"path"
 )
 
 // Base database
@@ -47,18 +48,35 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	case "postgresql":
 		ctx = &PostgreSQL{Base: base}
 	default:
-		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
+		err = fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type)
+		slog.Warn("Unsupported database type", 
+			"component", "database",
+			"model", model.Name,
+			"database", dbConfig.Name,
+			"type", dbConfig.Type,
+			"error", err)
 		return
 	}
 
-	logger.Info("=> database |", dbConfig.Type, ":", base.name)
+	slog.Info("Database operation starting", 
+		"component", "database",
+		slog.Group("database", 
+			"type", dbConfig.Type,
+			"name", base.name,
+		),
+		"model", model.Name)
 
 	// perform
 	err = ctx.perform()
 	if err != nil {
 		return err
 	}
-	logger.Info("")
+	// Log successful completion
+	slog.Debug("Database operation completed", 
+		"component", "database",
+		"type", dbConfig.Type,
+		"name", base.name,
+		"model", model.Name)
 
 	return
 }
@@ -69,14 +87,19 @@ func Run(model config.ModelConfig) error {
 		return nil
 	}
 
-	logger.Info("------------- Databases -------------")
+	slog.Info("Starting database backups", 
+		"component", "database",
+		"model", model.Name,
+		"count", len(model.Databases))
 	for _, dbCfg := range model.Databases {
 		err := runModel(model, dbCfg)
 		if err != nil {
 			return err
 		}
 	}
-	logger.Info("------------- Databases -------------\n")
+	slog.Info("Database backups completed", 
+		"component", "database",
+		"model", model.Name)
 
 	return nil
 }

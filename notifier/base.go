@@ -2,10 +2,10 @@ package notifier
 
 import (
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/holgerhuo/gobackup/config"
-	"github.com/holgerhuo/gobackup/logger"
 	"github.com/spf13/viper"
 )
 
@@ -44,24 +44,48 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 }
 
 func notify(model config.ModelConfig, title, message string, notifyType int) {
-	logger.Info("Running %d Notifiers", len(model.Notifiers))
+	notifyTypeStr := "failure"
+	if notifyType == notifyTypeSuccess {
+		notifyTypeStr = "success"
+	}
+	
+	slog.Info("Running notifiers", 
+		"component", "notifier",
+		"model", model.Name,
+		"count", len(model.Notifiers),
+		"type", notifyTypeStr)
+	
 	for name, config := range model.Notifiers {
 		notifier, base, err := newNotifier(name, config)
 		if err != nil {
-			logger.Error(err)
+			slog.Error("Failed to initialize notifier", 
+				"component", "notifier",
+				"model", model.Name,
+				"notifier", name,
+				"error", err)
 			continue
 		}
 
 		if notifyType == notifyTypeSuccess {
 			if base.onSuccess {
 				if err := notifier.notify(title, message); err != nil {
-					logger.Error(err)
+					slog.Error("Notification failed", 
+						"component", "notifier",
+						"model", model.Name,
+						"notifier", name,
+						"type", "success",
+						"error", err)
 				}
 			}
 		} else if notifyType == notifyTypeFailure {
 			if base.onFailure {
 				if err := notifier.notify(title, message); err != nil {
-					logger.Error(err)
+					slog.Error("Notification failed", 
+						"component", "notifier",
+						"model", model.Name,
+						"notifier", name,
+						"type", "failure",
+						"error", err)
 				}
 			}
 		}

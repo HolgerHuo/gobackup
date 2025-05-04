@@ -2,11 +2,11 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path"
 	"time"
 
-	"github.com/holgerhuo/gobackup/logger"
 	"github.com/spf13/viper"
 )
 
@@ -64,9 +64,16 @@ func Init(configFile string) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		logger.Error("Load gobackup config failed", err)
+		slog.Error("Configuration loading failed", 
+			"component", "config",
+			"configFile", configFile,
+			"error", err)
 		return
 	}
+	
+	slog.Debug("Configuration loaded successfully", 
+		"component", "config",
+		"configFile", viper.ConfigFileUsed())
 
 	Exist = true
 	Models = []ModelConfig{}

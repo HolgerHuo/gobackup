@@ -2,11 +2,12 @@ package archive
 
 import (
 	"fmt"
-	"github.com/holgerhuo/gobackup/config"
-	"github.com/holgerhuo/gobackup/helper"
-	"github.com/holgerhuo/gobackup/logger"
+	"log/slog"
 	"path"
 	"path/filepath"
+
+	"github.com/holgerhuo/gobackup/config"
+	"github.com/holgerhuo/gobackup/helper"
 )
 
 // Run archive
@@ -15,7 +16,9 @@ func Run(model config.ModelConfig) (err error) {
 		return nil
 	}
 
-	logger.Info("------------- Archives -------------")
+	slog.Info("Starting archive creation", 
+		"component", "archive",
+		"model", model.Name)
 
 	helper.MkdirP(model.DumpPath)
 
@@ -28,12 +31,19 @@ func Run(model config.ModelConfig) (err error) {
 	if len(includes) == 0 {
 		return fmt.Errorf("archive.includes have no config")
 	}
-	logger.Info("=> includes", len(includes), "rules")
+	slog.Info("Archive configuration", 
+		"component", "archive",
+		"model", model.Name,
+		"includeRules", len(includes),
+		"excludeRules", len(excludes))
 
 	opts := options(model.DumpPath, excludes, includes)
 	helper.Exec("tar", opts...)
 
-	logger.Info("------------- Archives -------------\n")
+	slog.Info("Archive creation completed", 
+		"component", "archive",
+		"model", model.Name,
+		"archivePath", path.Join(model.DumpPath, "archive.tar"))
 
 	return nil
 }

@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
-
-	"github.com/holgerhuo/gobackup/logger"
 )
 
 type Webhook struct {
@@ -81,10 +80,19 @@ func (s *Webhook) notify(title string, message string) error {
 		return err
 	}
 
-	logger.Info("Send notification to %s...", url)
+	slog.Info("Sending webhook notification", 
+		"component", "notifier.webhook",
+		"service", s.Service,
+		"url", url,
+		"method", s.method)
+	
 	req, err := http.NewRequest(s.method, url, strings.NewReader(string(payload)))
 	if err != nil {
-		logger.Error(err)
+		slog.Error("Failed to create HTTP request", 
+			"component", "notifier.webhook",
+			"service", s.Service,
+			"url", url,
+			"error", err)
 		return err
 	}
 
@@ -100,7 +108,11 @@ func (s *Webhook) notify(title string, message string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.Error(err)
+		slog.Error("HTTP request failed", 
+			"component", "notifier.webhook",
+			"service", s.Service,
+			"url", url,
+			"error", err)
 		return err
 	}
 	defer resp.Body.Close()
@@ -116,14 +128,26 @@ func (s *Webhook) notify(title string, message string) error {
 	if s.checkResult != nil {
 		err = s.checkResult(resp.StatusCode, body)
 		if err != nil {
-			logger.Error(err)
+			slog.Error("Webhook response validation failed", 
+				"component", "notifier.webhook",
+				"service", s.Service,
+				"url", url,
+				"status", resp.StatusCode,
+				"error", err)
 			return nil
 		}
 	} else {
-		logger.Info("Response body: %s", string(body))
+		slog.Info("Webhook response received", 
+			"component", "notifier.webhook",
+			"service", s.Service,
+			"status", resp.StatusCode,
+			"body", string(body))
 	}
 
-	logger.Info("Notification sent.")
+	slog.Info("Webhook notification sent successfully", 
+		"component", "notifier.webhook",
+		"service", s.Service,
+		"url", url)
 
 	return nil
 }

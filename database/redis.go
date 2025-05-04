@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
-	"github.com/holgerhuo/gobackup/helper"
-	"github.com/holgerhuo/gobackup/logger"
+	"log/slog"
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/holgerhuo/gobackup/helper"
 )
 
 type redisMode int
@@ -68,7 +69,12 @@ func (ctx *Redis) perform() (err error) {
 		return
 	}
 
-	logger.Info("-> Invoke save...")
+	slog.Info("Invoking Redis SAVE command", 
+		"component", "database",
+		"type", "redis",
+		"host", ctx.host,
+		"port", ctx.port)
+	
 	if err = ctx.save(); err != nil {
 		return
 	}
@@ -107,7 +113,11 @@ func (ctx *Redis) save() error {
 		return nil
 	}
 	// FIXME: add retry
-	logger.Info("Perform redis-cli save...")
+	slog.Info("Performing Redis SAVE command", 
+		"component", "database",
+		"type", "redis",
+		"command", redisCliCommand+" SAVE")
+	
 	out, err := helper.Exec(redisCliCommand, "SAVE")
 	if err != nil {
 		return fmt.Errorf("redis-cli SAVE failed %s", err)
@@ -122,7 +132,11 @@ func (ctx *Redis) save() error {
 
 func (ctx *Redis) sync() error {
 	dumpFilePath := path.Join(ctx.dumpPath, "dump.rdb")
-	logger.Info("Syncing redis dump to", dumpFilePath)
+	slog.Info("Syncing Redis dump file", 
+		"component", "database",
+		"type", "redis",
+		"dumpPath", dumpFilePath)
+	
 	_, err := helper.Exec(redisCliCommand, "--rdb", dumpFilePath)
 	if err != nil {
 		return fmt.Errorf("dump redis error: %s", err)
@@ -136,7 +150,12 @@ func (ctx *Redis) sync() error {
 }
 
 func (ctx *Redis) copy() error {
-	logger.Info("Copying redis dump to", ctx.dumpPath)
+	slog.Info("Copying Redis dump file", 
+		"component", "database",
+		"type", "redis",
+		"source", ctx.rdbPath,
+		"destination", ctx.dumpPath)
+	
 	_, err := helper.Exec("cp", ctx.rdbPath, ctx.dumpPath)
 	if err != nil {
 		return fmt.Errorf("copy redis dump file error: %s", err)

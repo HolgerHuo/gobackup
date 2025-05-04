@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
-	"github.com/holgerhuo/gobackup/helper"
-	"github.com/holgerhuo/gobackup/logger"
+	"log/slog"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/holgerhuo/gobackup/helper"
 )
 
 // PostgreSQL database
@@ -71,14 +72,32 @@ func (ctx *PostgreSQL) prepare() (err error) {
 
 func (ctx *PostgreSQL) dump() error {
 	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".dump")
-	logger.Info("-> Dumping PostgreSQL...")
+	
+	slog.Info("Dumping PostgreSQL database", 
+		"component", "database",
+		"type", "postgresql",
+		"database", ctx.database,
+		"host", ctx.host,
+		"port", ctx.port)
+	
 	if len(ctx.password) > 0 {
 		os.Setenv("PGPASSWORD", ctx.password)
 	}
+	
 	_, err := helper.Exec(ctx.dumpCommand, "-f", dumpFilePath)
 	if err != nil {
+		slog.Error("PostgreSQL dump failed",
+			"component", "database",
+			"type", "postgresql",
+			"database", ctx.database,
+			"error", err)
 		return err
 	}
-	logger.Info("dump path:", dumpFilePath)
+	
+	slog.Info("PostgreSQL dump completed", 
+		"component", "database",
+		"type", "postgresql",
+		"database", ctx.database,
+		"dumpPath", dumpFilePath)
 	return nil
 }

@@ -2,14 +2,15 @@ package storage
 
 import (
 	"fmt"
+	"log/slog"
+	"os"
+	"path"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/holgerhuo/gobackup/logger"
-	"os"
-	"path"
 )
 
 // S3 - Amazon S3 storage
@@ -71,13 +72,30 @@ func (ctx *S3) upload(fileKey string) (err error) {
 		Body:   f,
 	}
 
-	logger.Info("-> S3 Uploading...")
+	slog.Info("Uploading to S3", 
+		"component", "storage",
+		"type", "s3",
+		"model", ctx.model.Name,
+		"bucket", ctx.bucket,
+		"path", remotePath)
+	
 	result, err := ctx.client.Upload(input)
 	if err != nil {
+		slog.Error("S3 upload failed",
+			"component", "storage",
+			"type", "s3",
+			"model", ctx.model.Name,
+			"bucket", ctx.bucket,
+			"path", remotePath,
+			"error", err)
 		return fmt.Errorf("failed to upload file, %v", err)
 	}
 
-	logger.Info("=>", result.Location)
+	slog.Info("S3 upload successful", 
+		"component", "storage",
+		"type", "s3",
+		"model", ctx.model.Name,
+		"location", result.Location)
 	return nil
 }
 
@@ -87,6 +105,23 @@ func (ctx *S3) delete(fileKey string) (err error) {
 		Bucket: aws.String(ctx.bucket),
 		Key:    aws.String(remotePath),
 	}
+	
+	slog.Debug("Deleting S3 object", 
+		"component", "storage",
+		"type", "s3",
+		"model", ctx.model.Name,
+		"bucket", ctx.bucket,
+		"path", remotePath)
+	
 	_, err = ctx.client.S3.DeleteObject(input)
+	if err != nil {
+		slog.Error("S3 deletion failed",
+			"component", "storage",
+			"type", "s3",
+			"model", ctx.model.Name,
+			"bucket", ctx.bucket,
+			"path", remotePath,
+			"error", err)
+	}
 	return
 }

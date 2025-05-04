@@ -3,13 +3,13 @@ package storage
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log/slog"
 	"os"
 	"path"
 	"time"
 
 	"github.com/holgerhuo/gobackup/config"
 	"github.com/holgerhuo/gobackup/helper"
-	"github.com/holgerhuo/gobackup/logger"
 )
 
 type PackageList []Package
@@ -64,7 +64,11 @@ func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(
 
 		err := deletePackage(pkg.FileKey)
 		if err != nil {
-			logger.Warn("remove failed: ", err)
+			slog.Warn("Package removal failed",
+				"component", "storage.cycler",
+				"model", model,
+				"fileKey", pkg.FileKey,
+				"error", err)
 		}
 	}
 }
@@ -79,31 +83,51 @@ func (c *Cycler) load(cyclerFileName string) {
 
 	f, err := ioutil.ReadFile(cyclerFileName)
 	if err != nil {
-		logger.Error("Load cycler.json failed:", err)
+		slog.Error("Failed to load cycler file",
+			"component", "storage.cycler",
+			"file", cyclerFileName,
+			"error", err)
 		return
 	}
+	
 	err = json.Unmarshal(f, &c.packages)
 	if err != nil {
-		logger.Error("Unmarshal cycler.json failed:", err)
+		slog.Error("Failed to unmarshal cycler data",
+			"component", "storage.cycler",
+			"file", cyclerFileName,
+			"error", err)
 	}
 	c.isLoaded = true
 }
 
 func (c *Cycler) save(cyclerFileName string) {
 	if !c.isLoaded {
-		logger.Warn("Skip save cycler.json because it not loaded")
+		slog.Warn("Skipping cycler save - not loaded",
+			"component", "storage.cycler",
+			"file", cyclerFileName)
 		return
 	}
 
 	data, err := json.Marshal(&c.packages)
 	if err != nil {
-		logger.Error("Marshal packages to cycler.json failed: ", err)
+		slog.Error("Failed to marshal cycler data",
+			"component", "storage.cycler",
+			"file", cyclerFileName,
+			"error", err)
 		return
 	}
 
 	err = ioutil.WriteFile(cyclerFileName, data, os.ModePerm)
 	if err != nil {
-		logger.Error("Save cycler.json failed: ", err)
+		slog.Error("Failed to save cycler file",
+			"component", "storage.cycler",
+			"file", cyclerFileName,
+			"error", err)
 		return
 	}
+	
+	slog.Debug("Cycler file saved successfully",
+		"component", "storage.cycler",
+		"file", cyclerFileName,
+		"packageCount", len(c.packages))
 }

@@ -1,9 +1,10 @@
 package storage
 
 import (
-	"github.com/holgerhuo/gobackup/helper"
-	"github.com/holgerhuo/gobackup/logger"
+	"log/slog"
 	"path"
+
+	"github.com/holgerhuo/gobackup/helper"
 )
 
 // Local storage
@@ -26,13 +27,40 @@ func (ctx *Local) close() {}
 func (ctx *Local) upload(fileKey string) (err error) {
 	_, err = helper.Exec("cp", ctx.archivePath, ctx.destPath)
 	if err != nil {
+		slog.Error("Local storage upload failed",
+			"component", "storage",
+			"type", "local",
+			"model", ctx.model.Name,
+			"source", ctx.archivePath,
+			"destination", ctx.destPath,
+			"error", err)
 		return err
 	}
-	logger.Info("Store successed", ctx.destPath)
+	
+	slog.Info("Local storage upload successful",
+		"component", "storage",
+		"type", "local",
+		"model", ctx.model.Name,
+		"destination", ctx.destPath)
 	return nil
 }
 
 func (ctx *Local) delete(fileKey string) (err error) {
-	_, err = helper.Exec("rm", path.Join(ctx.destPath, fileKey))
+	filePath := path.Join(ctx.destPath, fileKey)
+	_, err = helper.Exec("rm", filePath)
+	if err != nil {
+		slog.Error("Local storage file deletion failed",
+			"component", "storage",
+			"type", "local",
+			"model", ctx.model.Name,
+			"file", filePath,
+			"error", err)
+	} else {
+		slog.Debug("Local storage file deleted",
+			"component", "storage",
+			"type", "local",
+			"model", ctx.model.Name,
+			"file", filePath)
+	}
 	return
 }

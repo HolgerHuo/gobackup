@@ -1,12 +1,12 @@
 package compressor
 
 import (
+	"log/slog"
 	"os"
 	"path"
 	"time"
 
 	"github.com/holgerhuo/gobackup/config"
-	"github.com/holgerhuo/gobackup/logger"
 	"github.com/spf13/viper"
 )
 
@@ -49,8 +49,10 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		ctx = &Zstd{Base: base}
 	}
 
-	logger.Info("------------ Compressor -------------")
-	logger.Info("=> Compress | " + model.CompressWith.Type)
+	slog.Info("Starting compression", 
+		"component", "compressor",
+		"model", model.Name,
+		"type", model.CompressWith.Type)
 
 	// set workdir
 	os.Chdir(path.Join(model.DumpPath, "../"))
@@ -58,8 +60,11 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	if err != nil {
 		return
 	}
-	logger.Info("->", archivePath)
-	logger.Info("------------ Compressor -------------\n")
+	slog.Info("Compression completed", 
+		"component", "compressor",
+		"model", model.Name,
+		"type", model.CompressWith.Type,
+		"archivePath", archivePath)
 
 	return
 }

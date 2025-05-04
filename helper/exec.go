@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/holgerhuo/gobackup/logger"
+	"log/slog"
 	"os"
 	"os/exec"
 	"regexp"
@@ -38,11 +38,19 @@ func Exec(command string, args ...string) (output string, err error) {
 	var stdErr bytes.Buffer
 	cmd.Stderr = &stdErr
 
-	// logger.Debug(fullCommand, " ", strings.Join(commandArgs, " "))
+	// Log command at debug level
+	slog.Debug("Executing command", 
+		"component", "exec",
+		"command", fullCommand,
+		"args", strings.Join(commandArgs, " "))
 
 	out, err := cmd.Output()
 	if err != nil {
-		logger.Debug(fullCommand, " ", strings.Join(commandArgs, " "))
+		slog.Debug("Command execution failed", 
+			"component", "exec",
+			"command", fullCommand,
+			"args", strings.Join(commandArgs, " "),
+			"error", stdErr.String())
 		err = errors.New(stdErr.String())
 		return
 	}
@@ -82,7 +90,11 @@ func ExecWithStdio(command string, stdout bool, args ...string) (output string, 
 
 	err = cmd.Run()
 	if err != nil {
-		logger.Debug(fullCommand, " ", strings.Join(commandArgs, " "))
+		slog.Debug("Command execution failed", 
+			"component", "exec",
+			"command", fullCommand,
+			"args", strings.Join(commandArgs, " "),
+			"error", stdErr.String())
 		err = errors.New(stdErr.String())
 	}
 	output = strings.Trim(stdOut.String(), "\n")

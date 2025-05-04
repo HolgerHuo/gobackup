@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
-	"github.com/holgerhuo/gobackup/helper"
-	"github.com/holgerhuo/gobackup/logger"
+	"log/slog"
 	"path"
 	"strings"
+
+	"github.com/holgerhuo/gobackup/helper"
 )
 
 // MySQL database
@@ -77,11 +78,22 @@ func (ctx *MySQL) dumpArgs() []string {
 }
 
 func (ctx *MySQL) dump() error {
-	logger.Info("-> Dumping MySQL...")
+	slog.Info("Dumping MySQL database", 
+		"component", "database",
+		"type", "mysql",
+		"database", ctx.database,
+		"host", ctx.host,
+		"port", ctx.port)
+	
 	_, err := helper.Exec("mysqldump", ctx.dumpArgs()...)
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}
-	logger.Info("dump path:", ctx.dumpPath)
+	
+	slog.Info("MySQL dump completed", 
+		"component", "database",
+		"type", "mysql",
+		"database", ctx.database,
+		"dumpPath", ctx.dumpPath)
 	return nil
 }

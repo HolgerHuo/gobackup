@@ -1,8 +1,9 @@
 package encryptor
 
 import (
+	"log/slog"
+
 	"github.com/holgerhuo/gobackup/config"
-	"github.com/holgerhuo/gobackup/logger"
 	"github.com/spf13/viper"
 )
 
@@ -39,15 +40,20 @@ func Run(archivePath string, model config.ModelConfig) (encryptPath string, err 
 		return
 	}
 
-	logger.Info("------------ Encryptor -------------")
-
-	logger.Info("=> Encrypt | " + model.EncryptWith.Type)
+	slog.Info("Starting encryption", 
+		"component", "encryptor",
+		"model", model.Name,
+		"type", model.EncryptWith.Type,
+		"sourcePath", archivePath)
 	encryptPath, err = ctx.perform()
 	if err != nil {
 		return
 	}
-	logger.Info("->", encryptPath)
-	logger.Info("------------ Encryptor -------------\n")
+	slog.Info("Encryption completed", 
+		"component", "encryptor",
+		"model", model.Name,
+		"type", model.EncryptWith.Type,
+		"encryptPath", encryptPath)
 
 	return
 }

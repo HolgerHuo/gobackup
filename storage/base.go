@@ -2,10 +2,11 @@ package storage
 
 import (
 	"fmt"
-	"github.com/holgerhuo/gobackup/config"
-	"github.com/holgerhuo/gobackup/logger"
-	"github.com/spf13/viper"
+	"log/slog"
 	"path/filepath"
+
+	"github.com/holgerhuo/gobackup/config"
+	"github.com/spf13/viper"
 )
 
 // Base storage
@@ -40,7 +41,10 @@ func newBase(model config.ModelConfig, archivePath string) (base Base) {
 
 // Run storage
 func Run(model config.ModelConfig, archivePath string) (err error) {
-	logger.Info("------------- Storage --------------")
+	slog.Info("Starting storage operation", 
+		"component", "storage",
+		"model", model.Name)
+	
 	newFileKey := filepath.Base(archivePath)
 	base := newBase(model, archivePath)
 	var ctx Context
@@ -53,7 +57,11 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 		return fmt.Errorf("[%s] storage type has not implement", model.StoreWith.Type)
 	}
 
-	logger.Info("=> Storage | " + model.StoreWith.Type)
+	slog.Info("Storage operation details", 
+		"component", "storage",
+		"type", model.StoreWith.Type,
+		"model", model.Name,
+		"fileKey", newFileKey)
 	err = ctx.open()
 	if err != nil {
 		return err
@@ -68,6 +76,9 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	cycler := Cycler{}
 	cycler.run(model.Name, newFileKey, base.keep, ctx.delete)
 
-	logger.Info("------------- Storage --------------\n")
+	slog.Info("Storage operation completed", 
+		"component", "storage",
+		"type", model.StoreWith.Type,
+		"model", model.Name)
 	return nil
 }
