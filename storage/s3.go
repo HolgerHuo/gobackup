@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
@@ -97,31 +96,4 @@ func (ctx *S3) upload(fileKey string) (err error) {
 		"model", ctx.model.Name,
 		"location", result.Location)
 	return nil
-}
-
-func (ctx *S3) delete(fileKey string) (err error) {
-	remotePath := path.Join(ctx.path, fileKey)
-	input := &s3.DeleteObjectInput{
-		Bucket: aws.String(ctx.bucket),
-		Key:    aws.String(remotePath),
-	}
-	
-	slog.Debug("Deleting S3 object", 
-		"component", "storage",
-		"type", "s3",
-		"model", ctx.model.Name,
-		"bucket", ctx.bucket,
-		"path", remotePath)
-	
-	_, err = ctx.client.S3.DeleteObject(input)
-	if err != nil {
-		slog.Error("S3 deletion failed",
-			"component", "storage",
-			"type", "s3",
-			"model", ctx.model.Name,
-			"bucket", ctx.bucket,
-			"path", remotePath,
-			"error", err)
-	}
-	return
 }

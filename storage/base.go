@@ -14,7 +14,6 @@ type Base struct {
 	model       config.ModelConfig
 	archivePath string
 	viper       *viper.Viper
-	keep        int
 }
 
 // Context storage interface
@@ -22,7 +21,6 @@ type Context interface {
 	open() error
 	close()
 	upload(fileKey string) error
-	delete(fileKey string) error
 }
 
 func newBase(model config.ModelConfig, archivePath string) (base Base) {
@@ -30,10 +28,6 @@ func newBase(model config.ModelConfig, archivePath string) (base Base) {
 		model:       model,
 		archivePath: archivePath,
 		viper:       model.StoreWith.Viper,
-	}
-
-	if base.viper != nil {
-		base.keep = base.viper.GetInt("keep")
 	}
 
 	return
@@ -72,9 +66,6 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	if err != nil {
 		return err
 	}
-
-	cycler := Cycler{}
-	cycler.run(model.Name, newFileKey, base.keep, ctx.delete)
 
 	slog.Info("Storage operation completed", 
 		"component", "storage",
