@@ -17,7 +17,7 @@ func IsExistsPath(p string) bool {
 // MkdirP like mkdir -p
 func MkdirP(dirPath string) {
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		os.MkdirAll(dirPath, 0777)
+		os.MkdirAll(dirPath, 0700)
 	}
 }
 
