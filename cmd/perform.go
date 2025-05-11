@@ -10,10 +10,9 @@ var (
 	modelName string
 )
 
-// performCmd represents the perform command
 var performCmd = &cobra.Command{
 	Use:   "perform",
-	Short: "Perform backup operations",
+	Short: "perform backup",
 	Run: func(cmd *cobra.Command, args []string) {
 		config.Init(configFile)
 
@@ -28,8 +27,7 @@ var performCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(performCmd)
 
-	// Define flags for the perform command
-	performCmd.Flags().StringVarP(&modelName, "model", "m", "", "Model name that you want execute")
+	performCmd.Flags().StringVarP(&modelName, "model", "m", "", "the model to perform")
 }
 
 func performAll() {
@@ -42,13 +40,11 @@ func performAll() {
 }
 
 func performOne(modelName string) {
-	for _, modelConfig := range config.Models {
-		if modelConfig.Name == modelName {
-			m := model.Model{
-				Config: modelConfig,
-			}
-			m.Perform()
-			return
+	modelConfig := config.GetModelByName(modelName)
+	if modelConfig != nil {
+		m := model.Model{
+			Config: *modelConfig,
 		}
+		m.Perform()
 	}
 }
