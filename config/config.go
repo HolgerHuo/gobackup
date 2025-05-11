@@ -30,7 +30,6 @@ type ModelConfig struct {
 	Archive      *viper.Viper
 	Databases    []SubConfig
 	Storages     []SubConfig
-	Notifiers      map[string]SubConfig
 	Viper        *viper.Viper
 	BeforeScript   string
 	AfterScript    string
@@ -110,7 +109,6 @@ func loadModel(key string) (model ModelConfig) {
 
 	loadDatabasesConfig(&model)
 	loadStoragesConfig(&model)
-	loadNotifiersConfig(&model)
 
 	return
 }
@@ -136,19 +134,6 @@ func loadStoragesConfig(model *ModelConfig) {
 			Type:  dbViper.GetString("type"),
 			Viper: dbViper,
 		})
-	}
-}
-
-func loadNotifiersConfig(model *ModelConfig) {
-	subViper := model.Viper.Sub("notifiers")
-	model.Notifiers = map[string]SubConfig{}
-	for key := range model.Viper.GetStringMap("notifiers") {
-		dbViper := subViper.Sub(key)
-		model.Notifiers[key] = SubConfig{
-			Name:  key,
-			Type:  dbViper.GetString("type"),
-			Viper: dbViper,
-		}
 	}
 }
 

@@ -10,7 +10,6 @@ import (
 	"github.com/holgerhuo/gobackup/database"
 	"github.com/holgerhuo/gobackup/encryptor"
 	"github.com/holgerhuo/gobackup/helper"
-	"github.com/holgerhuo/gobackup/notifier"
 	"github.com/holgerhuo/gobackup/storage"
 )
 
@@ -40,14 +39,6 @@ func (ctx Model) Perform() {
 				"error", err)
 		}
 	}
-
-	defer func() {
-		if err != nil {
-			notifier.Failure(ctx.Config, err.Error())
-		} else {
-			notifier.Success(ctx.Config)
-		}
-	}()
 
 	defer func() {
 		if r := recover(); r != nil {
