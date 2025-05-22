@@ -49,7 +49,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		ctx = &Zstd{Base: base}
 	}
 
-	slog.Info("Starting compression", 
+	slog.Info("starting compression", 
 		"component", "compressor",
 		"model", model.Name,
 		"type", model.CompressWith.Type)
@@ -60,7 +60,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	if err != nil {
 		return
 	}
-	slog.Info("Compression completed", 
+	slog.Info("compression completed", 
 		"component", "compressor",
 		"model", model.Name,
 		"type", model.CompressWith.Type,

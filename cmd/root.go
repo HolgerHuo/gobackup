@@ -10,7 +10,7 @@ import (
 var (
 	version    = "dev"
 	configFile string
-	verbose    bool
+	debug      bool
 	jsonLog    bool
 )
 
@@ -29,7 +29,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "path to config file")
-	rootCmd.PersistentFlags().BoolVar(&verbose, "debug", false, "enable verbose log")
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "enable verbose log")
 	rootCmd.PersistentFlags().BoolVar(&jsonLog, "json", false, "output logs in json format")
 	
 	cobra.OnInitialize(initLogger)
@@ -38,7 +38,7 @@ func init() {
 func initLogger() {
 	logLevel := new(slog.LevelVar)
 
-	if verbose {
+	if debug {
 		logLevel.Set(slog.LevelDebug)
 	} else {
 		logLevel.Set(slog.LevelInfo)
@@ -48,10 +48,12 @@ func initLogger() {
 	if jsonLog {
 		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: logLevel,
+			AddSource: debug,
 		})
 	} else {
 		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 			Level: logLevel,
+			AddSource: debug,
 		})
 	}
 	slog.SetDefault(slog.New(handler))

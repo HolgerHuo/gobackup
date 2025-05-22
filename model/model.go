@@ -13,120 +13,129 @@ import (
 	"github.com/holgerhuo/gobackup/storage"
 )
 
-// Model class
+// Model represents a backup model with its configuration.
 type Model struct {
 	Config config.ModelConfig
 }
 
-// Perform model
-func (ctx Model) Perform() {
-	slog.Info("Backup model starting", 
+// Perform executes the backup process for the model.
+func (m *Model) Perform() {
+	slog.Info("Backup model starting",
 		"component", "model",
-		"model", ctx.Config.Name,
-		"workDir", ctx.Config.DumpPath)
+		"model", m.Config.Name,
+		"workDir", m.Config.DumpPath,
+	)
 
-	var err error
-
-	if len(ctx.Config.BeforeScript) > 0 {
-		slog.Info("Executing before script", 
-			"component", "model",
-			"model", ctx.Config.Name)
-		_, err := helper.ExecWithStdio(ctx.Config.BeforeScript, true)
-		if err != nil {
-			slog.Error("Before script execution failed", 
-				"component", "model",
-				"model", ctx.Config.Name,
-				"error", err)
-		}
-	}
-
+	// Ensure cleanup is always called, even on panic.
 	defer func() {
 		if r := recover(); r != nil {
-			ctx.cleanup()
+			slog.Error("Panic occurred during backup model execution",
+				"component", "model",
+				"model", m.Config.Name,
+				"error", r,
+			)
 		}
-
-		ctx.cleanup()
+		m.cleanup()
 	}()
 
-	err = database.Run(ctx.Config)
-	if err != nil {
-		slog.Error("Database backup failed", 
+	if err := m.runScript(m.Config.BeforeScript, "before"); err != nil {
+		slog.Error("Before script execution failed",
 			"component", "model",
-			"model", ctx.Config.Name,
-			"error", err)
+			"model", m.Config.Name,
+			"error", err,
+		)
+	}
+
+	if err := database.Run(m.Config); err != nil {
+		slog.Error("Database backup failed",
+			"component", "model",
+			"model", m.Config.Name,
+			"error", err,
+		)
 		return
 	}
 
-	if ctx.Config.Archive != nil {
-		err = archive.Run(ctx.Config)
-		if err != nil {
-			slog.Error("Archive creation failed", 
+	if m.Config.Archive != nil {
+		if err := archive.Run(m.Config); err != nil {
+			slog.Error("Archive creation failed",
 				"component", "model",
-				"model", ctx.Config.Name,
-				"error", err)
+				"model", m.Config.Name,
+				"error", err,
+			)
 			return
 		}
 	}
 
-	archivePath, err := compressor.Run(ctx.Config)
+	archivePath, err := compressor.Run(m.Config)
 	if err != nil {
-		slog.Error("Compression failed", 
+		slog.Error("Compression failed",
 			"component", "model",
-			"model", ctx.Config.Name,
-			"error", err)
+			"model", m.Config.Name,
+			"error", err,
+		)
 		return
 	}
 
-	archivePath, err = encryptor.Run(archivePath, ctx.Config)
+	archivePath, err = encryptor.Run(archivePath, m.Config)
 	if err != nil {
-		slog.Error("Encryption failed", 
+		slog.Error("Encryption failed",
 			"component", "model",
-			"model", ctx.Config.Name,
-			"error", err)
+			"model", m.Config.Name,
+			"error", err,
+		)
 		return
 	}
 
-	err = storage.Run(ctx.Config, archivePath)
-	if err != nil {
-		slog.Error("Storage operation failed", 
+	if err := storage.Run(m.Config, archivePath); err != nil {
+		slog.Error("Storage operation failed",
 			"component", "model",
-			"model", ctx.Config.Name,
-			"error", err)
+			"model", m.Config.Name,
+			"error", err,
+		)
 		return
 	}
-
 }
 
-// Cleanup model temp files
-func (ctx Model) cleanup() {
-	slog.Info("Cleaning up temporary files", 
+// runScript executes a shell script if provided.
+func (m *Model) runScript(script string, stage string) error {
+	if len(script) == 0 {
+		return nil
+	}
+	slog.Info("Executing "+stage+" script",
 		"component", "model",
-		"model", ctx.Config.Name,
-		"tempPath", ctx.Config.TempPath)
-	
-	err := os.RemoveAll(ctx.Config.TempPath)
-	if err != nil {
-		slog.Error("Cleanup failed", 
+		"model", m.Config.Name,
+	)
+	_, err := helper.ExecWithStdio(script, true)
+	return err
+}
+
+// cleanup removes temporary files and runs the after script.
+func (m *Model) cleanup() {
+	slog.Info("Cleaning up temporary files",
+		"component", "model",
+		"model", m.Config.Name,
+		"tempPath", m.Config.TempPath,
+	)
+
+	if err := os.RemoveAll(m.Config.TempPath); err != nil {
+		slog.Error("Cleanup failed",
 			"component", "model",
-			"model", ctx.Config.Name,
-			"tempPath", ctx.Config.TempPath,
-			"error", err)
+			"model", m.Config.Name,
+			"tempPath", m.Config.TempPath,
+			"error", err,
+		)
 	}
 
-	if len(ctx.Config.AfterScript) > 0 {
-		slog.Info("Executing after script", 
+	if err := m.runScript(m.Config.AfterScript, "after"); err != nil {
+		slog.Error("After script execution failed",
 			"component", "model",
-			"model", ctx.Config.Name)
-		_, err := helper.ExecWithStdio(ctx.Config.AfterScript, true)
-		if err != nil {
-			slog.Error("After script execution failed", 
-				"component", "model",
-				"model", ctx.Config.Name,
-				"error", err)
-		}
+			"model", m.Config.Name,
+			"error", err,
+		)
 	}
 
-	slog.Info("Backup model completed", 
+	slog.Info("Backup model completed",
 		"component", "model",
-		"model", ctx.Config.Name)
+		"model", m.Config.Name,
+	)
 }
